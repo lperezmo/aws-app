@@ -53,7 +53,7 @@ def aggrid_multi_select(df: pd.DataFrame, website = None, list_of_text = None):
 
 
 	gd.configure_selection(selection_mode="multiple", 
-							# use_checkbox=True, 
+							use_checkbox=True, 
 							groupSelectsChildren=True,
 							groupSelectsFiltered=True,
 							rowMultiSelectWithClick=True, 
