@@ -4,4 +4,4 @@ s3fs
 boto3
 openai
 deta
-streamlit-aggrid
+streamlit-aggrid==0.3.3
