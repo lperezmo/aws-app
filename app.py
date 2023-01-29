@@ -196,6 +196,6 @@ if check_password():
                        temperature=1.0, # A measure of randomness
                        echo=False, # Whether to return the prompt in addition to the generated completion
                        )
-             response_text = response["choices"][0]["text"].strip()
-             st.code(response_text)
+            response_text = response["choices"][0]["text"].strip()
+            st.code(response_text)
 
