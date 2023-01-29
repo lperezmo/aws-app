@@ -2,5 +2,5 @@ pandas
 streamlit
 s3fs
 boto3
-openapi
+openai
 deta
