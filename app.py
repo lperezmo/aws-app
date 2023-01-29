@@ -193,7 +193,7 @@ if check_password():
                        engine="text-davinci-002",
                        prompt=f"{prompt}", # The prompt to start completing from
                        max_tokens=100, # The max number of tokens to generate
-                       temperature=1.0 # A measure of randomness
+                       temperature=1.0, # A measure of randomness
                        echo=False, # Whether to return the prompt in addition to the generated completion
                        )
              response_text = response["choices"][0]["text"].strip()
