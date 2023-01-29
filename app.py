@@ -158,7 +158,7 @@ if check_password():
     with st.form("Display selected images"):
         # Display a list of checkboxes for each image
         # options = st.multiselect('Select images to display', options = list(df['prompt']))
-        selection = aggrid_multi_select(df)
+        selection = aggrid_multi_select(df.loc[:,['prompt','date','id','image','key']])
 
         # Create a button to display the selected images
         if st.form_submit_button('Display'):
