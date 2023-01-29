@@ -141,7 +141,7 @@ if check_password():
 
     with st.form(key='create_image'):
         # Create a text box for the user to enter a prompt
-        prompt = st.text_input('Enter a prompt for the image generator')
+        prompt = st.text_area('Enter a prompt for the image generator')
 
         # Create a button to generate the image
         if st.form_submit_button('Generate Image'):
