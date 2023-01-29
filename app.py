@@ -135,6 +135,7 @@ if check_password():
         return image
     ###########################################################################################################
     st.title('Image Generator & Gallery')
+    st.caption('By Luis Perez Morales')
     st.write("This app uses DALL-E's API to generate images based on a given prompt. The images are then stored in an AWS S3 bucket and a database.")
     st.write('The images are then displayed in a gallery below.')
 
