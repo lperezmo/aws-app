@@ -1,0 +1,6 @@
+pandas
+streamlit
+s3fs
+boto3
+openapi
+deta
