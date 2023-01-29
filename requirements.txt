@@ -4,3 +4,4 @@ s3fs
 boto3
 openai
 deta
+streamlit-aggrid
