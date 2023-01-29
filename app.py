@@ -189,7 +189,7 @@ if check_password():
         prompt = st.text_input('Enter prompt')
         submit = st.form_submit_button('Submit prompt')
         if submit:
-            openai.Completion.create(
+            response = openai.Completion.create(
                        engine="text-davinci-002",
                        prompt=f"{prompt}", # The prompt to start completing from
                        max_tokens=100, # The max number of tokens to generate
