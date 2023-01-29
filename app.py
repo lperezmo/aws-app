@@ -173,6 +173,7 @@ if check_password():
 
             cols = st.columns(4)
             # Display the selected images
+            count = 0
             for index, row in selected_df.iterrows():
 
                 s3 = boto3.client('s3')
@@ -182,20 +183,22 @@ if check_password():
                 image = Image.open('temp')
                 image_list.append(image)
 
-                with cols[index%4]:
+                with cols[count%4]:
                     st.image(image, caption=row['prompt'], use_column_width=True)
+                count += 1
 
-    with st.form('Open prompt'):
-        prompt = st.text_input('Enter prompt')
-        submit = st.form_submit_button('Submit prompt')
-        if submit:
-            response = openai.Completion.create(
-                       # engine="text-davinci-002",
-                       prompt=f"{prompt}", # The prompt to start completing from
-                       max_tokens=100, # The max number of tokens to generate
-                       temperature=1.0, # A measure of randomness
-                       echo=False, # Whether to return the prompt in addition to the generated completion
-                       )
-            response_text = response["choices"][0]["text"].strip()
-            st.code(response_text)
+    # Breaks the image generating part of the app, removing until I can fix it
+    # with st.form('Open prompt'):
+    #     prompt = st.text_input('Enter prompt')
+    #     submit = st.form_submit_button('Submit prompt')
+    #     if submit:
+    #         response = openai.Completion.create(
+    #                    # engine="text-davinci-002",
+    #                    prompt=f"{prompt}", # The prompt to start completing from
+    #                    max_tokens=100, # The max number of tokens to generate
+    #                    temperature=1.0, # A measure of randomness
+    #                    echo=False, # Whether to return the prompt in addition to the generated completion
+    #                    )
+    #         response_text = response["choices"][0]["text"].strip()
+    #         st.code(response_text)
 
