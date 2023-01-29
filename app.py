@@ -185,3 +185,17 @@ if check_password():
                 with cols[index%4]:
                     st.image(image, caption=row['prompt'], use_column_width=True)
 
+     with st.form('Open prompt'):
+          prompt = st.text_input('Enter prompt')
+          submit = st.form_submit_button('Submit prompt')
+          if submit:
+               openai.Completion.create(
+                       engine="text-davinci-002",
+                       prompt=f"{prompt}", # The prompt to start completing from
+                       max_tokens=100, # The max number of tokens to generate
+                       temperature=1.0 # A measure of randomness
+                       echo=False, # Whether to return the prompt in addition to the generated completion
+                       )
+               response_text = response["choices"][0]["text"].strip()
+               st.code(response_text)
+
