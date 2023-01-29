@@ -190,7 +190,7 @@ if check_password():
         submit = st.form_submit_button('Submit prompt')
         if submit:
             response = openai.Completion.create(
-                       engine="text-davinci-002",
+                       # engine="text-davinci-002",
                        prompt=f"{prompt}", # The prompt to start completing from
                        max_tokens=100, # The max number of tokens to generate
                        temperature=1.0, # A measure of randomness
