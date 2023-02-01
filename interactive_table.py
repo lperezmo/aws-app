@@ -34,17 +34,17 @@ def aggrid_multi_select(df: pd.DataFrame, website = None, list_of_text = None):
 	gd = GridOptionsBuilder.from_dataframe(df)#, min_column_width=150)
 	gd.configure_side_bar() #Add a sidebar
 	gd.configure_default_column(
-								groupable=True, 
-								# value=True, 
-								enableRowGroup=True,
-								floatingFilter = True,
-								filter = "agSetColumnFilter",
-								# aggFunc="sum",
-								# suppressSyncLayoutWithGrid=True,
-								# contractColumnSelection=True, 
-								# suppressColumnExpandAll = True,
-								# filter=True
-								)
+				groupable=True, 
+				# value=True, 
+				enableRowGroup=True,
+				floatingFilter = True,
+				filter = "agSetColumnFilter",
+				# aggFunc="sum",
+				# suppressSyncLayoutWithGrid=True,
+				# contractColumnSelection=True, 
+				# suppressColumnExpandAll = True,
+				# filter=True
+				)
 	for column in df.columns:
 		if is_numeric_dtype(df[column]):
 			gd.configure_column(column, filter = "agNumberColumnFilter")
@@ -53,26 +53,26 @@ def aggrid_multi_select(df: pd.DataFrame, website = None, list_of_text = None):
 
 
 	gd.configure_selection(selection_mode="multiple", 
-							use_checkbox=True, 
-							groupSelectsChildren=True,
-							groupSelectsFiltered=True,
-							rowMultiSelectWithClick=True, 
-							# suppressColumnExpandAll = True,
-							)
+				use_checkbox=True, 
+				groupSelectsChildren=True,
+				groupSelectsFiltered=True,
+				rowMultiSelectWithClick=True, 
+				# suppressColumnExpandAll = True,
+				)
 	gridoptions = gd.build()
 	# gridoptions['getRowStyle'] = jscode
 	grid_table = AgGrid(
-						df,
-						# filtered_df.loc[:, cols_to_be_shown],
-						height=600,
-						gridOptions=gridoptions,
-						# fit_columns_on_grid_load=True,
-						update_mode=GridUpdateMode.SELECTION_CHANGED,
-						columns_auto_size_mode=ColumnsAutoSizeMode.FIT_CONTENTS,
-						enable_enterprise_modules=True,
-						# allow_unsafe_jscode=True,
-						# theme="material"
-						)
+			df,
+			# filtered_df.loc[:, cols_to_be_shown],
+			height=600,
+			gridOptions=gridoptions,
+			# fit_columns_on_grid_load=True,
+			update_mode=GridUpdateMode.SELECTION_CHANGED,
+			columns_auto_size_mode=ColumnsAutoSizeMode.FIT_CONTENTS,
+			enable_enterprise_modules=False,
+			# allow_unsafe_jscode=True,
+			# theme="material"
+			)
 
 	sel_row = grid_table["selected_rows"]
 	# node_id = grid_table["selected_row_ids"]
@@ -91,17 +91,17 @@ def aggrid_single_select(df: pd.DataFrame, website = None):
 		gd.configure_pagination(enabled=True)
 		gd.configure_side_bar() #Add a sidebar
 		gd.configure_default_column(
-									groupable=True, 
-									# value=True, 
-									enableRowGroup=True,
-									floatingFilter = True,
-									filter = "agSetColumnFilter",
-									# aggFunc="sum",
-									# suppressSyncLayoutWithGrid=True,
-									# contractColumnSelection=True, 
-									# suppressColumnExpandAll = True,
-									# filter=True
-									)
+					groupable=True, 
+					# value=True, 
+					enableRowGroup=True,
+					floatingFilter = True,
+					filter = "agSetColumnFilter",
+					# aggFunc="sum",
+					# suppressSyncLayoutWithGrid=True,
+					# contractColumnSelection=True, 
+					# suppressColumnExpandAll = True,
+					# filter=True
+					)
 		for column in df.columns:
 			if is_numeric_dtype(df[column]):
 				gd.configure_column(column, filter = "agNumberColumnFilter")
@@ -110,24 +110,24 @@ def aggrid_single_select(df: pd.DataFrame, website = None):
 
 
 		gd.configure_selection(selection_mode="single", 
-								# use_checkbox=True, 
-								groupSelectsChildren=True,
-								groupSelectsFiltered=True,
-								rowMultiSelectWithClick=True, 
-								# suppressColumnExpandAll = True,
-								)
+					# use_checkbox=True, 
+					groupSelectsChildren=True,
+					groupSelectsFiltered=True,
+					rowMultiSelectWithClick=True, 
+					# suppressColumnExpandAll = True,
+					)
 		gridoptions = gd.build()
 		grid_table = AgGrid(
-							df,
-							# filtered_df.loc[:, cols_to_be_shown],
-							height=600,
-							gridOptions=gridoptions,
-							# fit_columns_on_grid_load=True,
-							update_mode=GridUpdateMode.SELECTION_CHANGED,
-							columns_auto_size_mode=ColumnsAutoSizeMode.FIT_CONTENTS,
-							enable_enterprise_modules=True,
-							# theme="material"
-							)
+				df,
+				# filtered_df.loc[:, cols_to_be_shown],
+				height=600,
+				gridOptions=gridoptions,
+				# fit_columns_on_grid_load=True,
+				update_mode=GridUpdateMode.SELECTION_CHANGED,
+				columns_auto_size_mode=ColumnsAutoSizeMode.FIT_CONTENTS,
+				enable_enterprise_modules=False,
+				# theme="material"
+				)
 
 		sel_row = grid_table["selected_rows"]
 		# node_id = grid_table["selected_row_ids"]
