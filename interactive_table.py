@@ -35,7 +35,7 @@ def aggrid_multi_select(df: pd.DataFrame, website = None, list_of_text = None):
 	gd.configure_side_bar() #Add a sidebar
 	gd.configure_default_column(
 				groupable=True, 
-				# value=True, 
+				headerCheckboxSelection=True,
 				enableRowGroup=True,
 				floatingFilter = True,
 				filter = "agSetColumnFilter",
@@ -92,7 +92,7 @@ def aggrid_single_select(df: pd.DataFrame, website = None):
 		gd.configure_side_bar() #Add a sidebar
 		gd.configure_default_column(
 					groupable=True, 
-					# value=True, 
+					headerCheckboxSelection=True, 
 					enableRowGroup=True,
 					floatingFilter = True,
 					filter = "agSetColumnFilter",
