@@ -142,12 +142,12 @@ if check_password():
     with st.form(key='create_image'):
         # Create a text box for the user to enter a prompt
         prompt = st.text_area('Enter a prompt for the image generator')
-        width = st.slider('Width', min_value=500, max_value=2500, value=1024)
-        height = st.slider('Height', min_value=500, max_value=2500, value=1024)
+        # width = st.slider('Width', min_value=500, max_value=2500, value=1024)
+        # height = st.slider('Height', min_value=500, max_value=2500, value=1024)
         
         # Create a button to generate the image
         if st.form_submit_button('Generate Image'):
-            image = create_and_save_image(prompt, width, height)
+            image = create_and_save_image(prompt)
             st.image(image, caption=prompt, use_column_width=False, width=500)
 
     # Display the gallery
