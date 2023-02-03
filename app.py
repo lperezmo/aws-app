@@ -98,11 +98,11 @@ if check_password():
             return False
         return True
 
-    def create_and_save_image(given_prompt):
+    def create_and_save_image(given_prompt, width=1024, height=1024):
         response = openai.Image.create(
         prompt=given_prompt,
         n=1,
-        size="1024x1024"
+        size=f"{width}x{height}"
         )
         image_url = response['data'][0]['url']
         unique_id = response['created']
@@ -142,10 +142,12 @@ if check_password():
     with st.form(key='create_image'):
         # Create a text box for the user to enter a prompt
         prompt = st.text_area('Enter a prompt for the image generator')
-
+        width = st.slider(label, min_value=500, max_value=2500, value=1024)
+        height = st.slider(label, min_value=500, max_value=2500, value=1024)
+        
         # Create a button to generate the image
         if st.form_submit_button('Generate Image'):
-            image = create_and_save_image(prompt)
+            image = create_and_save_image(prompt, width, height)
             st.image(image, caption=prompt, use_column_width=False, width=500)
 
     # Display the gallery
