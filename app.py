@@ -441,16 +441,20 @@ if check_password():
         st.subheader("Image Editor")
         # Options for form
         use_previous = st.checkbox('Generate a variation of the previous image, leave unchecked if uploading an image')
+        section = st.selectbox('Select a section to mask', ['top-left', 'top-center', 'top-right', 'middle-left', 'middle-center', 'middle-right', 'bottom-left', 'bottom-center', 'bottom-right'])
         prompt = st.text_area('Enter a prompt for the image editor')
         uploaded = st.file_uploader('Upload an image to generate a variation')
-        section = st.selectbox('Select a section to mask', ['top-left', 'top-center', 'top-right', 'middle-left', 'middle-center', 'middle-right', 'bottom-left', 'bottom-center', 'bottom-right'])
 
         # Submit button to generate the image
         sbn = st.form_submit_button('Generate Variations of Uploaded Image')
         if sbn:
             if use_previous == True:
                 # image, unique_id = create_variant_and_save(image=image)
-                image, unique_id = edit_image_and_save(image=image, prompt=prompt, section=section)
+                mask = mask_section(image, section)
+                image, unique_id = edit_image_and_save(image=image,
+                                                        mask=mask,
+                                                        prompt=prompt, 
+                                                        section=section)
                 # prompt = prompt.replace(" ", "-")[0:15]
                 st.image(image, caption=f"{prompt} {unique_id}", use_column_width=False, width=500)
             else:
@@ -458,7 +462,11 @@ if check_password():
                 bytes_data = uploaded.getvalue()
                 stream = io.BytesIO(bytes_data)
                 img = Image.open(stream)
-                image, unique_id = edit_image_and_save(image=img, prompt=prompt, section=section)
+                mask = mask_section(img, section)
+                image, unique_id = edit_image_and_save(image=img, 
+                                                        mask=mask, 
+                                                        prompt=prompt, 
+                                                        section=section)
                 # prompt = prompt.replace(" ", "-")[0:15]
                 st.image(image, caption=f"{prompt} {unique_id}", use_column_width=False, width=500)
             # img = Image.open("example.jpg")
