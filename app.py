@@ -13,7 +13,7 @@ import requests
 from io import BytesIO
 import io
 import urllib.request
-from PIL import Image
+from PIL import Image, ImageDraw
 from deta import Deta
 from interactive_table import aggrid_multi_select
 ###########################################################################################################
@@ -245,6 +245,134 @@ if check_password():
             st.warning(e.http_status)
             st.warning(e.error)
 
+
+    def edit_image_and_save(image, mask, prompt, num_variations=1): 
+        """
+        Create a variant of the image and save to S3 bucket and database
+        
+        Parameters
+        ----------
+        image_for_variation : PIL image
+            The image to be used to create the variant
+        
+        Returns
+        -------
+        image : PIL image
+            The variant image
+        """
+        try:
+            # Resize both the image and the mask
+            width, height = 256, 256
+            image = image.resize((width, height))
+            mask = mask.resize((width, height))
+
+            # Convert the image to a BytesIO object
+            byte_stream = BytesIO()
+            image.save(byte_stream, format='PNG')
+            byte_array = byte_stream.getvalue()
+
+            # Convert the mask to a BytesIO object
+            byte_stream_mask = BytesIO()
+            mask.save(byte_stream_mask, format='PNG')
+            byte_array_mask = byte_stream_mask.getvalue()
+
+            # Edit picture
+            response = openai.Image.create_edit(
+            image=byte_array,
+            mask=byte_array_mask,
+            prompt=prompt,
+            n=num_variations,
+            size="1024x1024"
+            )
+
+            # Get the image URL and unique ID
+            image_url = response['data'][0]['url']
+            unique_id = response['created']
+
+            # Get current date from pandas
+            now = pd.Timestamp('now')
+            date_string = now.strftime('%Y-%m-%d')
+
+            # Open the image from the URL
+            with urllib.request.urlopen(image_url) as url:
+                s = url.read()
+
+            # Save the image to a file with a given string, current date and time
+            # file_name = f"{unique_id}_{date_string}.png"
+            
+            # Save the image to the local directory
+            # with open(file_name, 'wb') as f:
+            #     f.write(s)
+            
+            # Uncomment to upload to S3 bucket
+            # upload_file(file_name, "luisappsbucket", object_name=None)
+            
+            # Add entry to database (uncomment to add to database)
+            # st.session_state.db.put({'id': unique_id, 
+            #                         'date': date_string, 
+            #                         'prompt': f'Variant {unique_id}', 
+            #                         'image': file_name})
+
+            image = Image.open(BytesIO(s))
+
+            return image, unique_id
+        
+        except openai.error.OpenAIError as e:
+            st.warning(e.http_status)
+            st.warning(e.error)
+
+
+    def mask_section(img, section):
+        """
+        Mask a section of the image
+
+        Parameters
+        ----------
+        img : PIL image
+            The image to be masked
+        section : str
+            The section to be masked
+
+        Returns
+        -------
+        masked_img : PIL image
+            The masked image
+        """
+        # Divide the image into 9 sections
+        width, height = img.size
+        w_third = width // 3
+        h_third = height // 3
+        
+        # Define the coordinates for each section
+        if section == "top-left":
+            box = (0, 0, w_third, h_third)
+        elif section == "top-center":
+            box = (w_third, 0, 2 * w_third, h_third)
+        elif section == "top-right":
+            box = (2 * w_third, 0, width, h_third)
+        elif section == "middle-left":
+            box = (0, h_third, w_third, 2 * h_third)
+        elif section == "middle-center":
+            box = (w_third, h_third, 2 * w_third, 2 * h_third)
+        elif section == "middle-right":
+            box = (2 * w_third, h_third, width, 2 * h_third)
+        elif section == "bottom-left":
+            box = (0, 2 * h_third, w_third, height)
+        elif section == "bottom-center":
+            box = (w_third, 2 * h_third, 2 * w_third, height)
+        elif section == "bottom-right":
+            box = (2 * w_third, 2 * h_third, width, height)
+        else:
+            raise ValueError("Invalid section")
+        
+        # Create a mask with the selected section blacked out
+        mask = Image.new("1", img.size, color=255)
+        draw = ImageDraw.Draw(mask)
+        draw.rectangle(box, fill=0)
+        masked_img = Image.composite(img, Image.new("RGBA", img.size), mask)
+        
+        return masked_img
+
     ###########################################################################################################
     st.title('Image Generator & Gallery')
     st.caption('By Luis Perez Morales')
@@ -306,6 +434,36 @@ if check_password():
                 img = Image.open(stream)
                 image, unique_id = create_variant_and_save(image=img)
                 st.image(image, caption=f"Variant #{unique_id}", use_column_width=False, width=500)
+
+    #+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+    # Image Editor 
+    with st.form("Image Editor"):
+        st.subheader("Image Editor")
+        # Options for form
+        use_previous = st.checkbox('Generate a variation of the previous image, leave unchecked if uploading an image')
+        prompt = st.text_area('Enter a prompt for the image editor')
+        uploaded = st.file_uploader('Upload an image to generate a variation')
+        section = st.selectbox('Select a section to mask', ['top-left', 'top-center', 'top-right', 'middle-left', 'middle-center', 'middle-right', 'bottom-left', 'bottom-center', 'bottom-right'])
+
+        # Submit button to generate the image
+        sbn = st.form_submit_button('Generate Variations of Uploaded Image')
+        if sbn:
+            if use_previous == True:
+                # image, unique_id = create_variant_and_save(image=image)
+                image, unique_id = edit_image_and_save(image=image, prompt=prompt, section=section)
+                # prompt = prompt.replace(" ", "-")[0:15]
+                st.image(image, caption=f"{prompt} {unique_id}", use_column_width=False, width=500)
+            else:
+                # To read file as bytes and convert to pillow image
+                bytes_data = uploaded.getvalue()
+                stream = io.BytesIO(bytes_data)
+                img = Image.open(stream)
+                image, unique_id = edit_image_and_save(image=img, prompt=prompt, section=section)
+                # prompt = prompt.replace(" ", "-")[0:15]
+                st.image(image, caption=f"{prompt} {unique_id}", use_column_width=False, width=500)
+            # img = Image.open("example.jpg")
+            # masked_img = mask_section(img, "top-left")
+            # masked_img.show()
 
     #+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
     # Display the gallery
