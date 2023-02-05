@@ -47,9 +47,9 @@ def aggrid_multi_select(df: pd.DataFrame, website = None, list_of_text = None):
 				)
 	for column in df.columns:
 		if is_numeric_dtype(df[column]):
-			gd.configure_column(column, filter = "agNumberColumnFilter")
+			gd.configure_column(column, filter = "agNumberColumnFilter", maxWidth=300)
 		else:
-			gd.configure_column(column, filter = "agTextColumnFilter")
+			gd.configure_column(column, filter = "agTextColumnFilter", maxWidth=500)
 
 
 	gd.configure_selection(selection_mode="multiple", 
@@ -104,9 +104,9 @@ def aggrid_single_select(df: pd.DataFrame, website = None):
 					)
 		for column in df.columns:
 			if is_numeric_dtype(df[column]):
-				gd.configure_column(column, filter = "agNumberColumnFilter")
+				gd.configure_column(column, filter = "agNumberColumnFilter", maxWidth=100)
 			else:
-				gd.configure_column(column, filter = "agTextColumnFilter")
+				gd.configure_column(column, filter = "agTextColumnFilter", maxWidth=100)
 
 
 		gd.configure_selection(selection_mode="single", 

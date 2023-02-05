@@ -73,16 +73,38 @@ if check_password():
     # Uses st.experimental_memo to only rerun when the query changes or after 10 min.
     @st.experimental_memo(ttl=600)
     def read_file(filename):
+        """
+        Read a file from S3 and return its contents.
+        
+        Parameters
+        ----------
+        filename : str
+            The name of the file to read
+        
+        Returns
+        -------
+        Contents of the file
+        """
         with fs.open(filename) as f:
             return f.read().decode("utf-8")
 
-    def upload_file(file_name, bucket, object_name=None):
-        """Upload a file to an S3 bucket
 
-        :param file_name: File to upload
-        :param bucket: Bucket to upload to
-        :param object_name: S3 object name. If not specified then file_name is used
-        :return: True if file was uploaded, else False
+    def upload_file(file_name, bucket, object_name=None):
+        """
+        Upload a file to an Amazon Web Services S3 bucket
+
+        Parameters
+        ----------
+        file_name : str
+            File to upload
+        bucket : str
+            Bucket to upload to
+        object_name : str, optional
+            S3 object name. If not specified then file_name is used
+
+        Returns
+        -------
+        bool
         """
 
         # If S3 object_name was not specified, use file_name
@@ -98,58 +120,194 @@ if check_password():
             return False
         return True
 
-    def create_and_save_image(given_prompt, width=1024, height=1024):
-        response = openai.Image.create(
-        prompt=given_prompt,
-        n=1,
-        size=f"{width}x{height}"
-        )
-        image_url = response['data'][0]['url']
-        unique_id = response['created']
 
-        # Get current date from pandas
-        now = pd.Timestamp('now')
-        date_string = now.strftime('%Y-%m-%d')
+    def create_and_save_image(given_prompt, save_to_db=False):
+        """
+        Create an image from a given prompt and save it to an AWS S3 bucket and a database
 
-        # Open the image from the URL
-        with urllib.request.urlopen(image_url) as url:
-            s = url.read()
-
-        # Save the image to a file with a given string, current date and time
-        file_name = f"{unique_id}_{date_string}.jpg"
+        Parameters
+        ----------
+        given_prompt : str
+            The prompt to use to generate the image
         
-        # Save the image to the local directory
-        with open(file_name, 'wb') as f:
-            f.write(s)
-        
-        upload_file(file_name, "luisappsbucket", object_name=None)
-        
-        # Add entry to database
-        st.session_state.db.put({'id': unique_id, 
-                                'date': date_string, 
-                                'prompt': given_prompt, 
-                                'image': file_name})
+        Returns
+        -------
+        PIL.Image
+            The generated image
+        """
+        try:
+            response = openai.Image.create(
+            prompt=given_prompt,
+            n=1,
+            size=f"1024x1024"
+            )
+            image_url = response['data'][0]['url']
+            unique_id = response['created']
 
-        image = Image.open(BytesIO(s))
+            # Get current date from pandas
+            now = pd.Timestamp('now')
+            date_string = now.strftime('%Y-%m-%d')
 
-        return image
+            # Open the image from the URL
+            with urllib.request.urlopen(image_url) as url:
+                s = url.read()
+
+            # If save to database selected, save to S3 and database
+            if save_to_db:
+                # Save the image to a file with a given string, current date and time
+                file_name = f"{unique_id}_{date_string}.jpg"
+                
+                # Save the image to the local directory
+                with open(file_name, 'wb') as f:
+                    f.write(s)
+                
+                upload_file(file_name, "luisappsbucket", object_name=None)
+                
+                # Add entry to database
+                st.session_state.db.put({'id': unique_id, 
+                                        'date': date_string, 
+                                        'prompt': given_prompt, 
+                                        'image': file_name})
+
+            image = Image.open(BytesIO(s))
+
+            return image
+        except openai.error.OpenAIError as e:
+            st.warning(e.http_status)
+            st.warning(e.error)
+
+
+    def create_variant_and_save(image, num_variations=1): 
+        """
+        Create a variant of the image and save to S3 bucket and database
+        
+        Parameters
+        ----------
+        image_for_variation : PIL image
+            The image to be used to create the variant
+        
+        Returns
+        -------
+        image : PIL image
+            The variant image
+        """
+        try:
+            # Read the image file from disk and resize it
+            # image = Image.open("image.png")
+            width, height = 256, 256
+            image = image.resize((width, height))
+
+            # Convert the image to a BytesIO object
+            byte_stream = BytesIO()
+            image.save(byte_stream, format='PNG')
+            byte_array = byte_stream.getvalue()
+
+            # Create the variant
+            response = openai.Image.create_variation(
+            image=byte_array,
+            n=num_variations,
+            size="1024x1024"
+            )
+
+            # Get the image URL and unique ID
+            image_url = response['data'][0]['url']
+            unique_id = response['created']
+
+            # Get current date from pandas
+            now = pd.Timestamp('now')
+            date_string = now.strftime('%Y-%m-%d')
+
+            # Open the image from the URL
+            with urllib.request.urlopen(image_url) as url:
+                s = url.read()
+
+            # Save the image to a file with a given string, current date and time
+            # file_name = f"{unique_id}_{date_string}.png"
+            
+            # Save the image to the local directory
+            # with open(file_name, 'wb') as f:
+            #     f.write(s)
+            
+            # Uncomment to upload to S3 bucket
+            # upload_file(file_name, "luisappsbucket", object_name=None)
+            
+            # Add entry to database (uncomment to add to database)
+            # st.session_state.db.put({'id': unique_id, 
+            #                         'date': date_string, 
+            #                         'prompt': f'Variant {unique_id}', 
+            #                         'image': file_name})
+
+            image = Image.open(BytesIO(s))
+
+            return image, unique_id
+        
+        except openai.error.OpenAIError as e:
+            st.warning(e.http_status)
+            st.warning(e.error)
+
     ###########################################################################################################
     st.title('Image Generator & Gallery')
     st.caption('By Luis Perez Morales')
     st.write("This app uses DALL-E's API to generate images based on a given prompt. The images are then stored in an AWS S3 bucket and a database.")
     st.write('The images are then displayed in a gallery below.')
 
+    #+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+    # Form to get ideas for prompts
+    # Breaks the image generating part of the app, removing until I can fix it
+    with st.form('Open prompt'):
+        st.subheader("Prompt generator")
+        prompt = st.text_area('Enter prompt', value="Generate a highly detailed description of an image that relates to the following topics: artstation, salvador dali")
+        submit = st.form_submit_button('Submit prompt')
+        if submit:
+            try:
+                response = openai.Completion.create(
+                        engine="text-davinci-002",
+                        prompt=f"{prompt}. If asked who you are, say you are a Reddit searcher", # The prompt to start completing from
+                        max_tokens=200, # The max number of tokens to generate
+                        temperature=1.0, # A measure of randomness
+                        echo=False, # Whether to return the prompt in addition to the generated completion
+                        )
+                response_text = response["choices"][0]["text"].strip()
+                st.code(response_text)
+            except openai.error.OpenAIError as e:
+                st.warning(e.http_status)
+                st.warning(e.error)
+    #+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+    # Form to create an image
     with st.form(key='create_image'):
+        st.subheader("Image Generator")
         # Create a text box for the user to enter a prompt
+        save_to_database = st.checkbox('Save image to database', value=True)
         prompt = st.text_area('Enter a prompt for the image generator')
-        # width = st.slider('Width', min_value=500, max_value=2500, value=1024)
-        # height = st.slider('Height', min_value=500, max_value=2500, value=1024)
-        
         # Create a button to generate the image
         if st.form_submit_button('Generate Image'):
-            image = create_and_save_image(prompt)
+            image = create_and_save_image(prompt, save_to_database)
             st.image(image, caption=prompt, use_column_width=False, width=500)
 
+    #+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+    # Form to create a variant of an image
+    with st.form(key='create_variants'):
+        st.subheader("Image Variations")
+        # Options for form 
+        use_previous = st.checkbox('Generate a variation of the previous image, leave unchecked if uploading an image')
+        uploaded = st.file_uploader('Upload an image to generate a variation')
+
+        # Submit button to generate the image
+        sbn = st.form_submit_button('Generate Variations of Uploaded Image')
+
+        if sbn:
+            if use_previous == True:
+                image, unique_id = create_variant_and_save(image=image)
+                st.image(image, caption=f"Variant #{unique_id}", use_column_width=False, width=500)
+            else:
+                # To read file as bytes and convert to pillow image
+                bytes_data = uploaded.getvalue()
+                stream = io.BytesIO(bytes_data)
+                img = Image.open(stream)
+                image, unique_id = create_variant_and_save(image=img)
+                st.image(image, caption=f"Variant #{unique_id}", use_column_width=False, width=500)
+
+    #+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
     # Display the gallery
     st.write('## Gallery')
     st.write('The gallery below displays all the images generated by the app. Click on an image to view it in full size.')
@@ -160,7 +318,6 @@ if check_password():
     
     with st.form("Display selected images"):
         # Display a list of checkboxes for each image
-        # options = st.multiselect('Select images to display', options = list(df['prompt']))
         selection = aggrid_multi_select(df.loc[:,['prompt','date','id','image','key']])
 
         # Create a button to display the selected images
@@ -189,18 +346,4 @@ if check_password():
                     st.image(image, caption=row['prompt'], use_column_width=True)
                 count += 1
 
-    # Breaks the image generating part of the app, removing until I can fix it
-    # with st.form('Open prompt'):
-    #     prompt = st.text_input('Enter prompt')
-    #     submit = st.form_submit_button('Submit prompt')
-    #     if submit:
-    #         response = openai.Completion.create(
-    #                    # engine="text-davinci-002",
-    #                    prompt=f"{prompt}", # The prompt to start completing from
-    #                    max_tokens=100, # The max number of tokens to generate
-    #                    temperature=1.0, # A measure of randomness
-    #                    echo=False, # Whether to return the prompt in addition to the generated completion
-    #                    )
-    #         response_text = response["choices"][0]["text"].strip()
-    #         st.code(response_text)
-
+    #+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
