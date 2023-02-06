@@ -498,7 +498,7 @@ if check_password():
     with st.form("Image Editor"):
         st.subheader("Image Editor")
         # Options for form
-        use_previous = st.checkbox('Generate a variation of the previous image, leave unchecked if uploading an image')
+        use_previous = st.checkbox('Edit the the last generated image, leave unchecked if uploading an image')
         section = st.selectbox('Select a section to mask', ['top-left', 'top-center', 'top-right', 'middle-left', 'middle-center', 'middle-right', 'bottom-left', 'bottom-center', 'bottom-right'])
         prompt = st.text_area('Enter a prompt for the image editor')
         uploaded = st.file_uploader('Upload an image to be edited')
@@ -514,7 +514,7 @@ if check_password():
                     # Mask part of the image where the user wants to edit
                     mask = mask_section(image, section)
                     # Generate the edited image
-                    image, unique_id = edit_image_and_save(image=image,
+                    image, unique_id = edit_image_and_save(image=st.session_state.image,
                                                             mask=mask,
                                                             prompt=prompt)
                     # Display the image
