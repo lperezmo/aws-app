@@ -512,7 +512,7 @@ if check_password():
                     st.stop()
                 else:
                     # Mask part of the image where the user wants to edit
-                    mask = mask_section(image, section)
+                    mask = mask_section(st.session_state.image, section)
                     # Generate the edited image
                     image, unique_id = edit_image_and_save(image=st.session_state.image,
                                                             mask=mask,
