@@ -194,7 +194,7 @@ if check_password():
         try:
             # Read the image file from disk and resize it
             # image = Image.open("image.png")
-            width, height = 256, 256
+            width, height = 1024,1024
             image = image.resize((width, height))
 
             # Convert the image to a BytesIO object
@@ -262,7 +262,7 @@ if check_password():
         """
         try:
             # Resize both the image and the mask
-            width, height = 256, 256
+            width, height = 1024, 1024
             image = image.resize((width, height))
             mask = mask.resize((width, height))
 
