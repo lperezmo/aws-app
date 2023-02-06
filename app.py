@@ -451,6 +451,8 @@ if check_password():
             st.image(image, caption=prompt, use_column_width=False, width=500)
             # Save prompt to session state in case the user wants to save image to database
             st.session_state.prompt = prompt
+            # Save image to session state in case the user wants to generate a variation or edit
+            st.session_state.image = image
 
     #+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
     # Form to create a variant of an image
@@ -461,16 +463,22 @@ if check_password():
         uploaded = st.file_uploader('Upload an image to generate a variation')
 
         # Submit button to generate the image
-        sbn = st.form_submit_button('Generate Variations of Uploaded Image')
+        sbn = st.form_submit_button('Generate Variations')
 
         if sbn:
             if use_previous == True:
-                # Generate the image
-                image, unique_id = create_variant_and_save(image=image)
-                # Display the image
-                st.image(image, caption=f"Variant #{unique_id}", use_column_width=False, width=500)
-                # Save the prompt to the session state in case the user wants to save the image to the database
-                st.session_state.prompt = f"Variant #{unique_id}"
+                if 'image' not in st.session_state:
+                    st.warning('No image has been generated yet, please generate an image first')
+                    st.stop()
+                else:
+                    # Generate the image
+                    image, unique_id = create_variant_and_save(image=st.session_state.image)
+                    # Display the image
+                    st.image(image, caption=f"Variant #{unique_id}", use_column_width=False, width=500)
+                    # Save the prompt to the session state in case the user wants to save the image to the database
+                    st.session_state.prompt = f"Variant #{unique_id}"
+                    # Save the image to the session state in case the user wants to generate a variation or edit
+                    st.session_state.image = image
             else:
                 # To read file as bytes and convert to pillow image
                 bytes_data = uploaded.getvalue()
@@ -482,6 +490,8 @@ if check_password():
                 st.image(image, caption=f"Variant #{unique_id}", use_column_width=False, width=500)
                 # Save the prompt to the session state in case the user wants to save the image to the database
                 st.session_state.prompt = f"Variant #{unique_id}"
+                # Save the image to the session state in case the user wants to generate a variation or edit
+                st.session_state.image = image
 
     #+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
     # Image Editor 
@@ -497,16 +507,21 @@ if check_password():
         sbn = st.form_submit_button('Generate Edited Image')
         if sbn:
             if use_previous == True:
-                # Mask part of the image where the user wants to edit
-                mask = mask_section(image, section)
-                # Generate the edited image
-                image, unique_id = edit_image_and_save(image=image,
-                                                        mask=mask,
-                                                        prompt=prompt)
-                # Display the image
-                st.image(image, caption=f"{prompt} {unique_id}", use_column_width=False, width=500)
-                # Add prompt to session state in case user wants to save image to database
-                st.session_state.prompt = f"{prompt} {unique_id}"
+                if 'image' not in st.session_state:
+                    st.warning('No image has been generated yet, please generate an image first')
+                    st.stop()
+                else:
+                    # Mask part of the image where the user wants to edit
+                    mask = mask_section(image, section)
+                    # Generate the edited image
+                    image, unique_id = edit_image_and_save(image=image,
+                                                            mask=mask,
+                                                            prompt=prompt)
+                    # Display the image
+                    st.image(image, caption=f"{prompt} {unique_id}", use_column_width=False, width=500)
+                    # Add prompt to session state in case user wants to save image to database
+                    st.session_state.prompt = f"{prompt} {unique_id}"
+                    st.session_state.image = image
             else:
                 # To read file as bytes and convert to pillow image
                 bytes_data = uploaded.getvalue()
@@ -522,6 +537,8 @@ if check_password():
                 st.image(image, caption=f"{prompt} {unique_id}", use_column_width=False, width=500)
                 # Add prompt to session state in case user wants to save image to database
                 st.session_state.prompt = f"{prompt} {unique_id}"
+                # Add image to session state in case user wants to generate a variation or edit
+                st.session_state.image = image
 
     #+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
     # Manual Save
@@ -529,11 +546,15 @@ if check_password():
         st.subheader("Manual Save")
         st.write("Use this form to manually save the last generated image (variant, edit, or original) to the database. Uses the last prompt on session state.")
         if st.form_submit_button('Save Image'):
-            # Save the last generated image to the database with the last prompt on session state
-            # For temporary file, just use the name 'temp.png'
-            save_image_to_database(img = image, 
-                                    temp_file_name = 'temp.png',
-                                    prompt=st.session_state.prompt)
+            if 'image' not in st.session_state:
+                st.warning('No image has been generated yet, please generate an image first')
+                st.stop()
+            else:
+                # Save the last generated image to the database with the last prompt on session state
+                # For temporary file, just use the name 'temp.png'
+                save_image_to_database(img=st.session_state.image, 
+                                        prompt=st.session_state.prompt)
+                st.success(f'Image {st.session_state.prompt} saved to database')
 
     #+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
     # Display the gallery
