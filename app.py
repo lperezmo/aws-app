@@ -453,8 +453,7 @@ if check_password():
                 mask = mask_section(image, section)
                 image, unique_id = edit_image_and_save(image=image,
                                                         mask=mask,
-                                                        prompt=prompt, 
-                                                        section=section)
+                                                        prompt=prompt)
                 # prompt = prompt.replace(" ", "-")[0:15]
                 st.image(image, caption=f"{prompt} {unique_id}", use_column_width=False, width=500)
             else:
@@ -465,8 +464,7 @@ if check_password():
                 mask = mask_section(img, section)
                 image, unique_id = edit_image_and_save(image=img, 
                                                         mask=mask, 
-                                                        prompt=prompt, 
-                                                        section=section)
+                                                        prompt=prompt)
                 # prompt = prompt.replace(" ", "-")[0:15]
                 st.image(image, caption=f"{prompt} {unique_id}", use_column_width=False, width=500)
             # img = Image.open("example.jpg")
