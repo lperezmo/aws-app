@@ -1,7 +1,7 @@
-pandas==1.5.2
-streamlit==1.15.1
-s3fs==2023.1.0
-boto3==1.26.59
+streamlit==1.15.0
+pandas
+s3fs
+boto3
 openai==0.26.0
 deta==1.1.0
 streamlit-aggrid==0.3.3
