@@ -69,6 +69,9 @@ if check_password():
     if "db" not in st.session_state:
         st.session_state.db = st.session_state.deta.Base("aws-app")
     ###########################################################################################################
+    # OpenAI API key
+    openai.api_key = st.secrets["NEW_OPENAI_API_KEY"]
+    ###########################################################################################################
     # Retrieve file contents.
     # Uses st.experimental_memo to only rerun when the query changes or after 10 min.
     @st.experimental_memo(ttl=600)
