@@ -435,7 +435,7 @@ if check_password():
                         echo=False, # Whether to return the prompt in addition to the generated completion
                         )
                 response_text = response["choices"][0]["text"].strip()
-                st.code(response_text)
+                st.write(response_text)
             except openai.error.OpenAIError as e:
                 st.warning(e.http_status)
                 st.warning(e.error)
