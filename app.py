@@ -58,7 +58,7 @@ def check_password():
         # Password correct.
         return True
 ###########################################################################################################
-if check_password():
+if True: # check_password(): - temporarily removed password 
     # Create connection object.
     # `anon=False` means not anonymous, i.e. it uses access keys to pull data.
     fs = s3fs.S3FileSystem(anon=False)
@@ -427,14 +427,14 @@ if check_password():
         submit = st.form_submit_button('Submit prompt')
         if submit:
             try:
-                response = openai.Completion.create(
-                        engine="text-davinci-002",
-                        prompt=f"{prompt}", # The prompt to start completing from
-                        max_tokens=600, # The max number of tokens to generate
-                        temperature=1.0, # A measure of randomness
-                        echo=False, # Whether to return the prompt in addition to the generated completion
-                        )
-                response_text = response["choices"][0]["text"].strip()
+                response = openai.ChatCompletion.create(
+                             model="gpt-3.5-turbo",
+                             messages=[
+                                 {"role": "system", "content": "You are a helpful assistant."},
+                                 {"role": "user", "content": f"{prompt}"}
+                                 ]
+                            )
+                response_text = response["choices"][0]["content"].strip()
                 st.write(response_text)
             except openai.error.OpenAIError as e:
                 st.warning(e.http_status)
