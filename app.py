@@ -434,7 +434,7 @@ if True: # check_password(): - temporarily removed password
                                  {"role": "user", "content": f"{prompt}"}
                                  ]
                             )
-                response_text = response["choices"][0]["content"].strip()
+                response_text = response['choices'][0]['message']['content']
                 st.write(response_text)
             except openai.error.OpenAIError as e:
                 st.warning(e.http_status)
