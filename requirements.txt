@@ -1,5 +1,5 @@
 streamlit==1.15.0
-pandas
+pandas==1.5.3
 s3fs
 boto3
 openai==0.27.0
