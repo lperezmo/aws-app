@@ -3,5 +3,5 @@ pandas
 s3fs
 boto3
 openai==0.27.0
-deta==1.1.0
+deta
 streamlit-aggrid==0.3.3
