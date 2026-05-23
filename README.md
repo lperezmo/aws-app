@@ -1,7 +1,7 @@
 # aws-app
 
 
-[![Open in Streamlit](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)](https://luis-aws.streamlitapp.com/)
+[![Streamlit App](https://img.shields.io/badge/Streamlit-App-FF4B4B?logo=streamlit&logoColor=white)](https://luis-aws.streamlitapp.com/)
 ![GitHub](https://img.shields.io/github/license/lperezmo/aws-app)
 ![GitHub commit activity](https://img.shields.io/github/commit-activity/m/lperezmo/aws-app)
 ![GitHub repo size](https://img.shields.io/github/repo-size/lperezmo/aws-app)
